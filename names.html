@@ -34,7 +34,7 @@
 </style>
 </head>
 <body>
-<script src="assets/i18n.js?v=2"></script>
+<script src="assets/i18n.js?v=3"></script>
 <script src="assets/site.js?v=2"></script>
 <script src="assets/names.js?v=2"></script>
 
@@ -403,8 +403,9 @@ function doNak(){
   var chips=nk.s.map(function(s,i){
     return '<span class="chip'+(i===pada-1?" sel":"")+'" style="cursor:default">'+s[0]+" · "+s[1]+"</span>";
   }).join("");
+  var nkName = nk.n[L] + (L === "en" ? "" : " (" + nk.n.en + ")");
   out.innerHTML=
-    '<div class="mix-note" style="margin-top:18px"><b>'+T("nak_lb_nak")+":</b> "+nk.n[L]+" ("+nk.n.en+") &nbsp;·&nbsp; <b>"+T("nak_lb_pada")+":</b> "+pada+" &nbsp;·&nbsp; <b>"+T("nak_lb_rashi")+":</b> "+RASHI[ri][L]+"</div>"+
+    '<div class="mix-note" style="margin-top:18px"><b>'+T("nak_lb_nak")+":</b> "+nkName+" &nbsp;·&nbsp; <b>"+T("nak_lb_pada")+":</b> "+pada+" &nbsp;·&nbsp; <b>"+T("nak_lb_rashi")+":</b> "+RASHI[ri][L]+"</div>"+
     '<div class="mix-sec-t">'+T("nak_lb_syl")+'</div>'+
     '<div class="chips" style="justify-content:flex-start;margin-bottom:6px">'+chips+"</div>"+
     '<div class="mix-note">'+T("nak_yours")+": <b>"+nk.s[pada-1][0]+" · "+nk.s[pada-1][1]+"</b></div>"+
