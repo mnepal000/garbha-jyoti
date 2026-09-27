@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>शिशु नाम संग्रह | गर्भ ज्योति</title>
+<meta name="description" content="अर्थ सहित सुंदर संस्कृत शिशु नाम — खोजें और अपने शिशु के लिए शुभ नाम चुनें।">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="assets/img/logo.png">
+</head>
+<body>
+<script src="assets/site.js"></script>
+<script src="assets/names.js"></script>
+
+<section class="block" style="padding-top: 44px;">
+  <div class="wrap">
+    <h2 style="font-size: 40px;">शिशु नाम संग्रह</h2>
+    <p class="sub">अर्थ सहित सुंदर संस्कृत नाम — खोजें, छाँटें, चुनें</p>
+    <div class="filters">
+      <input type="search" id="q" placeholder="नाम खोजें… (जैसे: दिया, Aarav)" oninput="render()">
+      <button class="pill sel" data-g="सभी" onclick="setG(this)">सभी</button>
+      <button class="pill" data-g="बालक" onclick="setG(this)">बालक</button>
+      <button class="pill" data-g="बालिका" onclick="setG(this)">बालिका</button>
+      <button class="pill" data-g="दोनों" onclick="setG(this)">दोनों</button>
+    </div>
+    <div class="name-grid" id="grid"></div>
+    <p class="count" id="count"></p>
+    <div class="prose" style="margin-top: 40px;">
+      <p style="text-align:center; color: var(--muted);">🪔 <b>जल्द आ रहा है:</b> नक्षत्र के अनुसार नाम खोज — जन्म विवरण डालें, शुभ अक्षर पाएं।</p>
+    </div>
+  </div>
+</section>
+
+<script>
+var curG = "सभी";
+function setG(btn) {
+  curG = btn.getAttribute("data-g");
+  document.querySelectorAll(".pill").forEach(function (p) { p.classList.remove("sel"); });
+  btn.classList.add("sel");
+  render();
+}
+function render() {
+  var q = document.getElementById("q").value.trim().toLowerCase();
+  var list = window.NAMES.filter(function (x) {
+    if (curG !== "सभी" && x.g !== curG) return false;
+    if (q && x.n.toLowerCase().indexOf(q) < 0 && x.d.indexOf(q) < 0 && x.m.indexOf(document.getElementById("q").value.trim()) < 0) return false;
+    return true;
+  });
+  var html = list.map(function (x) {
+    var tags = '<span class="tag">' + x.g + "</span>";
+    if (x.t) tags += '<span class="tag">' + x.t + "</span>";
+    return '<div class="name-card"><div class="nm">' + x.d + '</div><div class="lt">' + x.n + '</div><div class="mn">' + x.m + '</div><div class="tags">' + tags + "</div></div>";
+  }).join("");
+  document.getElementById("grid").innerHTML = html || '<p class="soon">कोई नाम नहीं मिला — कुछ और खोजकर देखें।</p>';
+  document.getElementById("count").textContent = list.length + " नाम";
+}
+render();
+</script>
+</body>
+</html>
