@@ -4,12 +4,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>शिशु नाम संग्रह | गर्भ ज्योति</title>
-<meta name="description" content="अर्थ सहित सुंदर संस्कृत शिशु नाम — खोजें और अपने शिशु के लिए शुभ नाम चुनें।">
+<meta name="description" content="अर्थ सहित 5000 सुंदर संस्कृत शिशु नाम, खोजें, छाँटें, माता-पिता के नाम मिलाएँ।">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
 <link rel="icon" href="assets/img/logo.png">
+<style>
+.flt-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; margin: 12px 0; }
+.flt-label { font-weight: 600; color: var(--maroon); font-size: 15px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.chip { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 5px 12px; font-size: 14px; cursor: pointer; }
+.chip.sel { background: var(--maroon); color: #fff; border-color: var(--maroon); }
+.sortsel { border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 14px; background: #fff; }
+.pager { display: flex; gap: 12px; justify-content: center; align-items: center; margin: 22px 0; }
+.pager button { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 7px 18px; cursor: pointer; font-size: 14px; }
+.pager button:disabled { opacity: 0.4; cursor: default; }
+.mixer { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 28px; margin-top: 48px; }
+.mixer h3 { text-align: center; color: var(--maroon); margin: 0 0 6px; font-size: 26px; }
+.mixer .sub { text-align: center; color: var(--muted); margin: 0 0 18px; }
+.mix-form { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: end; }
+.mix-field { display: flex; flex-direction: column; gap: 4px; }
+.mix-field label { font-size: 13px; color: var(--muted); }
+.mix-field input { border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font-size: 15px; min-width: 160px; }
+.mix-go { background: var(--maroon); color: #fff; border: none; border-radius: 10px; padding: 10px 22px; font-size: 15px; cursor: pointer; }
+.mix-sec-t { color: var(--maroon); font-size: 19px; margin: 24px 0 4px; }
+.mix-note { background: #fff8e6; border: 1px solid #f0d98c; border-radius: 10px; padding: 10px 14px; font-size: 14px; margin: 12px 0; }
+.tag.compound { background: #f3e8d0; color: #7a5b1e; }
+</style>
 </head>
 <body>
 <script src="assets/i18n.js"></script>
@@ -20,15 +42,66 @@
   <div class="wrap">
     <h2 style="font-size: 40px;" data-i18n="n_title"></h2>
     <p class="sub" data-i18n="n_sub"></p>
+
     <div class="filters">
-      <input type="search" id="q" data-i18n="search_ph" oninput="render()">
+      <input type="search" id="q" data-i18n="search_ph" oninput="onFilter()">
       <button class="pill sel" data-g="all" onclick="setG(this)" data-i18n="pill_all"></button>
       <button class="pill" data-g="boy" onclick="setG(this)" data-i18n="pill_boy"></button>
       <button class="pill" data-g="girl" onclick="setG(this)" data-i18n="pill_girl"></button>
       <button class="pill" data-g="both" onclick="setG(this)" data-i18n="pill_both"></button>
     </div>
+
+    <div class="flt-row">
+      <span class="flt-label" data-i18n="flt_letter"></span>
+      <div class="chips" id="letters"></div>
+    </div>
+    <div class="flt-row">
+      <span class="flt-label" data-i18n="flt_syl"></span>
+      <div class="chips" id="syls"></div>
+      <span class="flt-label" data-i18n="sort_label" style="margin-left: 14px;"></span>
+      <select class="sortsel" id="sort" onchange="onFilter()">
+        <option value="az" data-i18n="sort_az"></option>
+        <option value="sylAsc" data-i18n="sort_syl_asc"></option>
+        <option value="sylDesc" data-i18n="sort_syl_desc"></option>
+      </select>
+    </div>
+
     <div class="name-grid" id="grid"></div>
     <p class="count" id="count"></p>
+    <div class="pager" id="pager"></div>
+
+    <div class="mixer">
+      <h3 data-i18n="mix_title"></h3>
+      <p class="sub" data-i18n="mix_sub"></p>
+      <div class="mix-form">
+        <div class="mix-field">
+          <label for="mixF" data-i18n="mix_father"></label>
+          <input type="text" id="mixF" autocomplete="off">
+        </div>
+        <div class="mix-field">
+          <label for="mixM" data-i18n="mix_mother"></label>
+          <input type="text" id="mixM" autocomplete="off">
+        </div>
+        <div class="mix-field">
+          <label for="mixInit" data-i18n="mix_initial"></label>
+          <input type="text" id="mixInit" maxlength="1" style="min-width: 70px;" autocomplete="off">
+        </div>
+        <div class="mix-field">
+          <label>&nbsp;</label>
+          <div class="chips" id="mixG">
+            <button class="chip sel" data-g="all" onclick="setMixG(this)" data-i18n="pill_all"></button>
+            <button class="chip" data-g="boy" onclick="setMixG(this)" data-i18n="pill_boy"></button>
+            <button class="chip" data-g="girl" onclick="setMixG(this)" data-i18n="pill_girl"></button>
+          </div>
+        </div>
+        <div class="mix-field">
+          <label>&nbsp;</label>
+          <button class="mix-go" onclick="doMix()" data-i18n="mix_go"></button>
+        </div>
+      </div>
+      <div id="mixOut"></div>
+    </div>
+
     <div class="prose" style="margin-top: 40px;">
       <p style="text-align:center; color: var(--muted);" data-i18n="soon_names"></p>
     </div>
@@ -36,35 +109,180 @@
 </section>
 
 <script>
-var curG = "all";
+var curG = "all", curL = "all", curS = "all", curSort = "az", curPage = 0;
+var mixG = "all";
+var PAGE = 48;
+
 function T(k, v) { return window.I18N.t(k, v); }
 function gLabel(g) { return T(g === "boy" ? "pill_boy" : g === "girl" ? "pill_girl" : "pill_both"); }
+
 function setG(btn) {
   curG = btn.getAttribute("data-g");
-  document.querySelectorAll(".pill").forEach(function (p) { p.classList.remove("sel"); });
+  var pills = btn.parentElement.querySelectorAll(".pill");
+  pills.forEach(function (p) { p.classList.remove("sel"); });
   btn.classList.add("sel");
-  render();
+  onFilter();
 }
-function render() {
+function setLetter(btn) {
+  curL = btn.getAttribute("data-l");
+  document.querySelectorAll("#letters .chip").forEach(function (p) { p.classList.remove("sel"); });
+  btn.classList.add("sel");
+  onFilter();
+}
+function setSyl(btn) {
+  curS = btn.getAttribute("data-s");
+  document.querySelectorAll("#syls .chip").forEach(function (p) { p.classList.remove("sel"); });
+  btn.classList.add("sel");
+  onFilter();
+}
+function setMixG(btn) {
+  mixG = btn.getAttribute("data-g");
+  document.querySelectorAll("#mixG .chip").forEach(function (p) { p.classList.remove("sel"); });
+  btn.classList.add("sel");
+}
+
+function buildChips() {
+  var initials = {};
+  window.NAMES.forEach(function (x) { initials[x.n.charAt(0).toUpperCase()] = 1; });
+  var lh = '<button class="chip' + (curL === "all" ? " sel" : "") + '" data-l="all" onclick="setLetter(this)">' + T("flt_all") + "</button>";
+  Object.keys(initials).sort().forEach(function (c) {
+    lh += '<button class="chip' + (curL === c ? " sel" : "") + '" data-l="' + c + '" onclick="setLetter(this)">' + c + "</button>";
+  });
+  document.getElementById("letters").innerHTML = lh;
+  var sh = '<button class="chip' + (curS === "all" ? " sel" : "") + '" data-s="all" onclick="setSyl(this)">' + T("flt_all") + "</button>";
+  ["1", "2", "3", "4", "5+"].forEach(function (s) {
+    sh += '<button class="chip' + (curS === s ? " sel" : "") + '" data-s="' + s + '" onclick="setSyl(this)">' + s + "</button>";
+  });
+  document.getElementById("syls").innerHTML = sh;
+}
+
+function filtered() {
   var raw = document.getElementById("q").value.trim();
   var q = raw.toLowerCase();
-  var L = window.I18N.lang;
   var list = window.NAMES.filter(function (x) {
-    if (curG !== "all" && x.g !== curG) return false;
+    if (curG !== "all" && x.g !== curG && x.g !== "both") return false;
+    if (curL !== "all" && x.n.charAt(0).toUpperCase() !== curL) return false;
+    if (curS !== "all") {
+      if (curS === "5+") { if (x.s < 5) return false; }
+      else if (x.s !== parseInt(curS, 10)) return false;
+    }
     if (q && x.n.toLowerCase().indexOf(q) < 0 && x.d.indexOf(raw) < 0 &&
         x.m.hi.indexOf(raw) < 0 && x.m.en.toLowerCase().indexOf(q) < 0 && x.m.ne.indexOf(raw) < 0) return false;
     return true;
   });
-  var html = list.map(function (x) {
-    var tags = '<span class="tag">' + gLabel(x.g) + "</span>";
-    if (x.t) tags += '<span class="tag">' + x.t + "</span>";
-    return '<div class="name-card"><div class="nm">' + x.d + '</div><div class="lt">' + x.n +
-      '</div><div class="mn">' + x.m[L] + '</div><div class="tags">' + tags + "</div></div>";
-  }).join("");
-  document.getElementById("grid").innerHTML = html || '<p class="soon">' + T("no_res") + "</p>";
-  document.getElementById("count").textContent = T("names_count", { n: list.length });
+  curSort = document.getElementById("sort").value;
+  if (curSort === "az") list.sort(function (a, b) { return a.n < b.n ? -1 : 1; });
+  else if (curSort === "sylAsc") list.sort(function (a, b) { return a.s - b.s || (a.n < b.n ? -1 : 1); });
+  else list.sort(function (a, b) { return b.s - a.s || (a.n < b.n ? -1 : 1); });
+  return list;
 }
-window.onLangChange = render;
+
+function card(x) {
+  var L = window.I18N.lang;
+  var tags = '<span class="tag">' + gLabel(x.g) + "</span>";
+  if (x.t) tags += '<span class="tag">' + x.t + "</span>";
+  if (x.src === "compound") tags += '<span class="tag compound">' + T("tag_compound") + "</span>";
+  return '<div class="name-card"><div class="nm">' + x.d + '</div><div class="lt">' + x.n +
+    '</div><div class="mn">' + x.m[L] + '</div><div class="tags">' + tags + "</div></div>";
+}
+
+function onFilter() { curPage = 0; render(); }
+
+function render() {
+  var list = filtered();
+  var pages = Math.max(1, Math.ceil(list.length / PAGE));
+  if (curPage >= pages) curPage = pages - 1;
+  var slice = list.slice(curPage * PAGE, curPage * PAGE + PAGE);
+  document.getElementById("grid").innerHTML = slice.map(card).join("") ||
+    '<p class="soon">' + T("no_res") + "</p>";
+  document.getElementById("count").textContent = T("names_count", { n: list.length });
+  var pg = document.getElementById("pager");
+  if (pages > 1) {
+    pg.innerHTML = '<button onclick="goPage(-1)" ' + (curPage === 0 ? "disabled" : "") + ">" + T("page_prev") + "</button>" +
+      '<span>' + T("page_of", { p: curPage + 1, t: pages }) + "</span>" +
+      '<button onclick="goPage(1)" ' + (curPage === pages - 1 ? "disabled" : "") + ">" + T("page_next") + "</button>";
+  } else { pg.innerHTML = ""; }
+}
+function goPage(d) { curPage += d; render(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+
+/* ---------- parent-name mixer ---------- */
+function nameChunks(s) {
+  s = s.toLowerCase().replace(/[^a-z]/g, "");
+  var m = s.match(/[^aeiou]*[aeiou]+[^aeiou]?/g);
+  return (m && m.join("").length >= Math.max(2, s.length - 1)) ? m : [s];
+}
+function genBlends(f, m) {
+  var A = nameChunks(f), B = nameChunks(m), seen = {}, res = [];
+  function add(s) {
+    if (s.length < 3 || s.length > 12) return;
+    s = s.charAt(0).toUpperCase() + s.slice(1);
+    if (!seen[s]) { seen[s] = 1; res.push(s); }
+  }
+  var i, j;
+  for (i = 1; i <= A.length; i++) for (j = 1; j <= B.length; j++) {
+    add(A.slice(0, i).join("") + B.slice(-j).join(""));
+    add(B.slice(0, j).join("") + A.slice(-i).join(""));
+  }
+  var fl = f.toLowerCase().replace(/[^a-z]/g, ""), ml = m.toLowerCase().replace(/[^a-z]/g, "");
+  add(fl.slice(0, Math.ceil(fl.length / 2)) + ml.slice(Math.floor(ml.length / 2)));
+  add(ml.slice(0, Math.ceil(ml.length / 2)) + fl.slice(Math.floor(fl.length / 2)));
+  return res;
+}
+function lev(a, b) {
+  var d = [], i, j;
+  for (i = 0; i <= a.length; i++) d[i] = [i];
+  for (j = 0; j <= b.length; j++) d[0][j] = j;
+  for (i = 1; i <= a.length; i++) for (j = 1; j <= b.length; j++)
+    d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+  return d[a.length][b.length];
+}
+function doMix() {
+  var f = document.getElementById("mixF").value.trim();
+  var m = document.getElementById("mixM").value.trim();
+  var init = document.getElementById("mixInit").value.trim().toUpperCase();
+  var out = document.getElementById("mixOut");
+  if (!f || !m) { out.innerHTML = '<p class="soon">' + T("mix_none") + "</p>"; return; }
+  var blends = genBlends(f, m);
+  var dbNames = {};
+  window.NAMES.forEach(function (x) { dbNames[x.n.toLowerCase()] = x; });
+  function okG(x) { return mixG === "all" || x.g === mixG || x.g === "both"; }
+  function okI(nm) { return !init || nm.charAt(0).toUpperCase() === init; }
+  var exact = [], scored = [];
+  blends.forEach(function (b) {
+    var bl = b.toLowerCase();
+    if (dbNames[bl] && okG(dbNames[bl]) && okI(b)) { exact.push(dbNames[bl]); return; }
+    var best = null, bestD = 99;
+    window.NAMES.forEach(function (x) {
+      if (!okG(x) || !okI(x.n)) return;
+      var d = lev(bl, x.n.toLowerCase());
+      if (d < bestD) { bestD = d; best = x; }
+    });
+    if (best && bestD <= 3) scored.push({ x: best, d: bestD, b: b });
+  });
+  scored.sort(function (a, b) { return a.d - b.d; });
+  var seenR = {}, real = [];
+  exact.concat(scored.map(function (s) { return s.x; })).forEach(function (x) {
+    if (!seenR[x.n]) { seenR[x.n] = 1; real.push(x); }
+  });
+  real = real.slice(0, 8);
+  var creative = blends.filter(function (b) { return !dbNames[b.toLowerCase()] && okI(b); }).slice(0, 8);
+  var html = "";
+  if (real.length) {
+    html += '<div class="mix-sec-t">' + T("mix_match") + "</div>" +
+      '<div class="name-grid">' + real.map(card).join("") + "</div>";
+  }
+  if (creative.length) {
+    html += '<div class="mix-sec-t">' + T("mix_creative") + "</div>" +
+      '<div class="mix-note">' + T("mix_review") + "</div>" +
+      '<div class="name-grid">' + creative.map(function (b) {
+        return '<div class="name-card"><div class="nm">' + b + '</div><div class="lt">' + T("mix_creative") + "</div></div>";
+      }).join("") + "</div>";
+  }
+  out.innerHTML = html || '<p class="soon">' + T("no_res") + "</p>";
+}
+
+buildChips();
+window.onLangChange = function () { buildChips(); render(); };
 render();
 </script>
 </body>
