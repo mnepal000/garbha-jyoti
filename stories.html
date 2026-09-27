@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>पौराणिक कथाएँ | गर्भ ज्योति</title>
+<meta name="description" content="गर्भ में शिशु को सुनाने के लिए हिंदू धर्म की 50 मधुर कथाएँ, सप्ताह 18 से प्रसव तक।">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="assets/img/logo.png">
+<style>
+.st-filters { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 26px 0 8px; }
+.st-filters input[type="search"] { flex: 1 1 220px; padding: 12px 16px; border: 2px solid #e8dcc8; border-radius: 999px; font-size: 16px; font-family: inherit; background: #fff; }
+.st-filters select { padding: 12px 16px; border: 2px solid #e8dcc8; border-radius: 999px; font-size: 16px; font-family: inherit; background: #fff; }
+.st-chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 22px; }
+.st-chip { padding: 8px 16px; border-radius: 999px; border: 2px solid #e8dcc8; background: #fff; font-size: 15px; cursor: pointer; font-family: inherit; }
+.st-chip.sel { background: var(--maroon); border-color: var(--maroon); color: #fff; }
+.st-card { cursor: pointer; display: flex; flex-direction: column; }
+.st-card h3 { font-size: 21px; margin: 10px 0 6px; }
+.st-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.st-badge { font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 999px; background: #fdf3e0; color: var(--maroon); border: 1px solid #e8dcc8; }
+.st-moral { font-style: italic; color: var(--muted); font-size: 15.5px; margin: 8px 0; }
+.st-excerpt { color: #444; font-size: 16px; flex: 1; }
+.st-read { color: var(--maroon); font-weight: 700; margin-top: 12px; display: inline-block; }
+.st-modal-ov { position: fixed; inset: 0; background: rgba(40, 10, 10, 0.6); z-index: 200; display: flex; align-items: flex-start; justify-content: center; padding: 24px 16px; overflow-y: auto; }
+.st-modal { background: #fffdf8; border-radius: 18px; max-width: 720px; width: 100%; padding: 34px 32px; box-shadow: 0 24px 60px rgba(0,0,0,0.25); position: relative; margin: auto 0; }
+.st-modal h2 { font-size: 30px; margin: 12px 0 4px; line-height: 1.3; }
+.st-modal .st-body { font-size: 18px; line-height: 1.85; color: #333; margin: 18px 0; }
+.st-moralbox { background: #fdf3e0; border-left: 4px solid var(--gold); padding: 14px 18px; border-radius: 0 12px 12px 0; margin: 18px 0; }
+.st-moralbox b { color: var(--maroon); }
+.st-modal-nav { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+.st-x { position: absolute; top: 14px; right: 16px; font-size: 26px; background: none; border: none; cursor: pointer; color: var(--muted); }
+.st-count { color: var(--muted); font-size: 15px; margin: 4px 0 0; }
+@media (max-width: 600px) { .st-modal { padding: 26px 20px; } .st-modal h2 { font-size: 24px; } }
+</style>
+</head>
+<body>
+<script src="assets/i18n.js?v=4"></script>
+<script src="assets/site.js?v=3"></script>
+<script src="assets/stories.js?v=1"></script>
+
+<section class="block" style="padding-top: 44px;">
+  <div class="wrap">
+    <h2 style="font-size: 40px;" data-i18n="st_title"></h2>
+    <p class="sub" data-i18n="st_sub"></p>
+
+    <div class="st-filters">
+      <input type="search" id="st-q" data-i18n="st_search" oninput="renderStories()">
+      <select id="st-week" onchange="renderStories()"></select>
+    </div>
+    <div class="st-chips" id="st-chips"></div>
+    <p class="st-count" id="st-count"></p>
+    <div class="cards" id="st-grid" style="margin-top: 14px;"></div>
+    <p id="st-empty" style="display:none; text-align:center; color: var(--muted); padding: 30px 0;" data-i18n="st_no_res"></p>
+  </div>
+</section>
+
+<div class="st-modal-ov" id="st-overlay" style="display:none;" onclick="if(event.target===this) closeStory()">
+  <div class="st-modal">
+    <button class="st-x" onclick="closeStory()" aria-label="close">×</button>
+    <div id="st-reader"></div>
+  </div>
+</div>
+
+<script>
+var THEMES = ["krishna","rama","shiva","devi","vishnu","hanuman","ganesha","wisdom","devotion"];
+var selTheme = "all", curId = null, filtered = [];
+function T(k, v) { return window.I18N.t(k, v); }
+function L() { return window.I18N.lang; }
+function themeName(th) { return T("th_" + th); }
+
+function initFilters() {
+  var wsel = document.getElementById("st-week");
+  var html = '<option value="all">' + T("st_all_weeks") + "</option>";
+  for (var w = 18; w <= 40; w++) html += '<option value="' + w + '">' + T("st_week_badge", { w: w }) + "</option>";
+  wsel.innerHTML = html;
+  var qp = new URLSearchParams(location.search).get("week");
+  if (qp && +qp >= 18 && +qp <= 40) wsel.value = qp;
+  var chips = document.getElementById("st-chips");
+  var ch = '<button class="st-chip sel" data-th="all" onclick="pickTheme(\'all\')">' + T("st_all_themes") + "</button>";
+  THEMES.forEach(function (th) {
+    ch += '<button class="st-chip" data-th="' + th + '" onclick="pickTheme(\'' + th + '\')">' + themeName(th) + "</button>";
+  });
+  chips.innerHTML = ch;
+}
+function pickTheme(th) {
+  selTheme = th;
+  document.querySelectorAll("#st-chips .st-chip").forEach(function (c) {
+    c.classList.toggle("sel", c.getAttribute("data-th") === th);
+  });
+  renderStories();
+}
+function storyMatches(s, q) {
+  q = q.trim().toLowerCase();
+  if (!q) return true;
+  var L_ = L();
+  return (s.title.hi + " " + s.title.en + " " + s.title.ne + " " + s.text[L_]).toLowerCase().indexOf(q) >= 0;
+}
+function renderStories() {
+  var L_ = L();
+  var q = document.getElementById("st-q").value;
+  var wv = document.getElementById("st-week").value;
+  filtered = window.STORIES.filter(function (s) {
+    if (selTheme !== "all" && s.th !== selTheme) return false;
+    if (wv !== "all" && s.wk !== +wv) return false;
+    return storyMatches(s, q);
+  });
+  var grid = document.getElementById("st-grid");
+  var html = "";
+  filtered.forEach(function (s) {
+    var excerpt = s.text[L_].length > 110 ? s.text[L_].slice(0, 110) + "..." : s.text[L_];
+    html += '<div class="card st-card" onclick="openStory(' + s.id + ')">' +
+      '<div class="st-badges"><span class="st-badge">' + T("st_week_badge", { w: s.wk }) + '</span>' +
+      '<span class="st-badge">' + themeName(s.th) + "</span></div>" +
+      "<h3>" + s.title[L_] + "</h3>" +
+      '<p class="st-moral">' + s.moral[L_] + "</p>" +
+      '<p class="st-excerpt">' + excerpt + "</p>" +
+      '<span class="st-read">' + T("st_read") + " →</span></div>";
+  });
+  grid.innerHTML = html;
+  document.getElementById("st-empty").style.display = filtered.length ? "none" : "block";
+  document.getElementById("st-count").textContent = filtered.length + " / " + window.STORIES.length;
+}
+function openStory(id) {
+  curId = id;
+  renderReader();
+  document.getElementById("st-overlay").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+function closeStory() {
+  stopListen();
+  document.getElementById("st-overlay").style.display = "none";
+  document.body.style.overflow = "";
+}
+function stepStory(d) {
+  var i = filtered.findIndex(function (s) { return s.id === curId; });
+  if (i < 0) return;
+  var n = filtered[(i + d + filtered.length) % filtered.length];
+  stopListen();
+  curId = n.id;
+  renderReader();
+  document.getElementById("st-overlay").scrollTop = 0;
+}
+function renderReader() {
+  var L_ = L();
+  var s = window.STORIES[curId - 1];
+  var prevDis = filtered.length > 1 ? "" : " disabled";
+  document.getElementById("st-reader").innerHTML =
+    '<div class="st-badges"><span class="st-badge">' + T("st_week_badge", { w: s.wk }) + '</span>' +
+    '<span class="st-badge">' + themeName(s.th) + "</span></div>" +
+    "<h2>" + s.title[L_] + "</h2>" +
+    '<div class="st-moralbox"><b>' + T("st_moral") + ":</b> " + s.moral[L_] + "</div>" +
+    '<div class="st-body">' + s.text[L_] + "</div>" +
+    '<div class="st-modal-nav">' +
+    '<button class="btn btn-gold" id="st-listenbtn" onclick="toggleListen()">🔊 ' + T("st_listen") + "</button>" +
+    '<button class="btn btn-outline" onclick="stepStory(-1)"' + prevDis + ">" + T("st_prev") + "</button>" +
+    '<button class="btn btn-outline" onclick="stepStory(1)"' + prevDis + ">" + T("st_next") + "</button>" +
+    '<button class="btn btn-outline" onclick="closeStory()">' + T("st_close") + "</button></div>";
+}
+var speaking = false;
+function toggleListen() {
+  if (speaking) { stopListen(); return; }
+  var s = window.STORIES[curId - 1];
+  var L_ = L();
+  if (!("speechSynthesis" in window)) return;
+  var u = new SpeechSynthesisUtterance(s.title[L_] + ". " + s.text[L_]);
+  u.lang = L_ === "hi" ? "hi-IN" : L_ === "ne" ? "ne-NP" : "en-IN";
+  u.rate = 0.95;
+  try {
+    var vs = speechSynthesis.getVoices();
+    for (var i = 0; i < vs.length; i++) {
+      if (vs[i].lang && vs[i].lang.toLowerCase().indexOf(u.lang.slice(0, 2)) === 0) { u.voice = vs[i]; break; }
+    }
+  } catch (e) {}
+  u.onend = function () { speaking = false; paintListenBtn(); };
+  speaking = true;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+  paintListenBtn();
+}
+function stopListen() {
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  speaking = false;
+  paintListenBtn();
+}
+function paintListenBtn() {
+  var b = document.getElementById("st-listenbtn");
+  if (b) b.innerHTML = speaking ? "⏹ " + T("st_stop") : "🔊 " + T("st_listen");
+}
+window.onLangChange = function () {
+  initFilters();
+  pickTheme(selTheme);
+  if (document.getElementById("st-overlay").style.display === "flex") { stopListen(); renderReader(); }
+};
+document.addEventListener("DOMContentLoaded", function () {
+  initFilters();
+  renderStories();
+  document.addEventListener("keydown", function (e) {
+    if (document.getElementById("st-overlay").style.display === "flex") {
+      if (e.key === "Escape") closeStory();
+      if (e.key === "ArrowRight") stepStory(1);
+      if (e.key === "ArrowLeft") stepStory(-1);
+    }
+  });
+});
+</script>
+</body>
+</html>

@@ -5,6 +5,7 @@
     ["week.html", "nav_week"],
     ["names.html", "nav_names"],
     ["mantras.html", "nav_mantras"],
+    ["stories.html", "nav_stories"],
     ["about.html", "nav_about"],
   ];
   var page = (location.pathname.split("/").pop() || "index.html").split("?")[0];
@@ -31,6 +32,7 @@
       '<li><a href="week.html" data-i18n="nav_week">' + T("nav_week") + "</a></li>" +
       '<li><a href="names.html" data-i18n="nav_names">' + T("nav_names") + "</a></li>" +
       '<li><a href="mantras.html" data-i18n="nav_mantras">' + T("nav_mantras") + "</a></li>" +
+      '<li><a href="stories.html" data-i18n="nav_stories">' + T("nav_stories") + "</a></li>" +
       '<li><a href="about.html" data-i18n="nav_about">' + T("nav_about") + "</a></li></ul></div>" +
       '<div><h4 data-i18n="f_connect_t">' + T("f_connect_t") + "</h4><ul>" +
       '<li><a href="https://www.youtube.com/@garbhajyoti" target="_blank" rel="noopener" data-i18n="f_yt">' + T("f_yt") + "</a></li>" +
