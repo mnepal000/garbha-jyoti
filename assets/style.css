@@ -177,3 +177,14 @@ footer.site-footer li { margin-bottom: 6px; }
   .week-detail { padding: 26px 20px; }
   .tracker input[type="date"] { margin-bottom: 10px; width: 100%; }
 }
+
+/* Language toggle */
+.nav-wrap { display: flex; align-items: center; gap: 14px; }
+.lang-toggle { display: flex; border: 1.5px solid var(--gold); border-radius: 999px; overflow: hidden; }
+.lang-toggle button { background: transparent; border: 0; color: var(--gold); font-family: inherit; font-size: 0.82rem; padding: 6px 12px; cursor: pointer; }
+.lang-toggle button + button { border-left: 1px solid var(--gold); }
+.lang-toggle button.sel { background: var(--gold); color: var(--maroon); font-weight: 700; }
+@media (max-width: 720px) {
+  .nav-wrap { width: 100%; justify-content: space-between; }
+  .header-inner { flex-wrap: wrap; }
+}

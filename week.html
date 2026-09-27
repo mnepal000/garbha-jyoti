@@ -12,19 +12,20 @@
 <link rel="icon" href="assets/img/logo.png">
 </head>
 <body>
+<script src="assets/i18n.js"></script>
 <script src="assets/site.js"></script>
 <script src="assets/weeks.js"></script>
 
 <section class="block" style="padding-top: 44px;">
   <div class="wrap">
-    <h2 style="font-size: 40px;">सप्ताह-दर-सप्ताह यात्रा</h2>
-    <p class="sub">हर सप्ताह: शिशु का विकास, एक अभ्यास और एक सुझाव</p>
+    <h2 style="font-size: 40px;" data-i18n="w_title"></h2>
+    <p class="sub" data-i18n="w_sub"></p>
 
     <div class="tracker">
-      <h2>आप किस सप्ताह में हैं?</h2>
-      <p>अपनी ड्यू डेट (प्रसव की संभावित तिथि) डालें — हम आपका सप्ताह बता देंगे</p>
+      <h2 data-i18n="tr_t"></h2>
+      <p data-i18n="tr_d"></p>
       <input type="date" id="duedate">
-      <button class="btn btn-gold" onclick="calcWeek()">मेरा सप्ताह देखें</button>
+      <button class="btn btn-gold" onclick="calcWeek()" data-i18n="tr_btn"></button>
       <p id="tracker-msg" style="margin-top: 14px; margin-bottom: 0; min-height: 28px;"></p>
     </div>
 
@@ -34,7 +35,8 @@
 </section>
 
 <script>
-var MAXW = 40;
+var MAXW = 40, curSel = 12;
+function T(k, v) { return window.I18N.t(k, v); }
 function hasData(w) { return window.WEEKS.some(function (x) { return x.w === w; }); }
 function renderNav(sel) {
   var el = document.getElementById("weeknav");
@@ -47,41 +49,44 @@ function renderNav(sel) {
   el.innerHTML = html;
 }
 function selectWeek(w) {
+  curSel = w;
   renderNav(w);
   var d = document.getElementById("weekdetail");
+  var L = window.I18N.lang;
   var found = null;
   window.WEEKS.forEach(function (x) { if (x.w === w) found = x; });
   if (found) {
     d.innerHTML =
-      '<div class="week-detail"><div class="wk">' + w + "वां सप्ताह</div><h2>" + found.size + "</h2>" +
-      '<div class="fact"><div class="ic">🌱</div><div><h4>शिशु का विकास</h4><p>' + found.growth + "</p></div></div>" +
-      '<div class="fact"><div class="ic">🪔</div><div><h4>इस सप्ताह का अभ्यास</h4><p>' + found.sadhana + "</p></div></div>" +
-      '<div class="fact"><div class="ic">💡</div><div><h4>सुझाव</h4><p>' + found.tip + "</p></div></div></div>";
+      '<div class="week-detail"><div class="wk">' + T("wk_label", { w: w }) + "</div><h2>" + found.size[L] + "</h2>" +
+      '<div class="fact"><div class="ic">🌱</div><div><h4>' + T("lbl_growth") + "</h4><p>" + found.growth[L] + "</p></div></div>" +
+      '<div class="fact"><div class="ic">🪔</div><div><h4>' + T("lbl_sadhana") + "</h4><p>" + found.sadhana[L] + "</p></div></div>" +
+      '<div class="fact"><div class="ic">💡</div><div><h4>' + T("lbl_tip") + "</h4><p>" + found.tip[L] + "</p></div></div></div>";
   } else {
     d.innerHTML =
       '<div class="week-detail"><div class="soon"><div style="font-size:44px; margin-bottom:10px;">🪔</div>' +
-      "<h2>" + w + "वां सप्ताह — जल्द आ रहा है</h2>" +
-      "<p>हम हर सप्ताह नई सामग्री जोड़ रहे हैं। नए वीडियो सबसे पहले पाने के लिए<br>" +
-      '<a class="btn btn-gold" style="margin-top:16px;" href="https://www.youtube.com/@garbhajyoti" target="_blank" rel="noopener">YouTube पर जुड़ें</a></p></div></div>';
+      "<h2>" + T("soon_t", { w: w }) + "</h2>" +
+      "<p>" + T("soon_d") + "<br>" +
+      '<a class="btn btn-gold" style="margin-top:16px;" href="https://www.youtube.com/@garbhajyoti" target="_blank" rel="noopener">' + T("soon_btn") + "</a></p></div></div>";
   }
   d.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 function calcWeek() {
   var v = document.getElementById("duedate").value;
   var msg = document.getElementById("tracker-msg");
-  if (!v) { msg.textContent = "कृपया तिथि चुनें"; return; }
+  if (!v) { msg.textContent = T("tr_pick"); return; }
   var due = new Date(v + "T00:00:00");
   var lmp = new Date(due.getTime() - 280 * 86400000);
   var now = new Date(); now.setHours(0, 0, 0, 0);
   var w = Math.floor((now - lmp) / 604800000) + 1;
-  if (w < 1) { msg.textContent = "बधाई! आपकी यात्रा अभी शुरू होने वाली है — पहला सप्ताह देखें।"; selectWeek(1); }
-  else if (w > 40) { msg.textContent = "आपकी ड्यू डेट निकल चुकी है — शिशु के जन्म की बधाई!"; }
-  else { msg.textContent = "बधाई! आप अभी " + w + "वें सप्ताह में हैं।"; selectWeek(w); }
+  if (w < 1) { msg.textContent = T("tr_early"); selectWeek(1); }
+  else if (w > 40) { msg.textContent = T("tr_late"); }
+  else { msg.textContent = T("tr_now", { w: w }); selectWeek(w); }
 }
+window.onLangChange = function () { selectWeek(curSel); };
 (function init() {
   var m = location.search.match(/[?&]w=(\d+)/);
-  var start = m ? Math.min(40, Math.max(1, parseInt(m[1], 10))) : 12;
-  selectWeek(start);
+  curSel = m ? Math.min(40, Math.max(1, parseInt(m[1], 10))) : 12;
+  selectWeek(curSel);
   window.scrollTo(0, 0);
 })();
 </script>
