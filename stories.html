@@ -134,7 +134,6 @@ function openStory(id) {
   document.body.style.overflow = "hidden";
 }
 function closeStory() {
-  stopListen();
   document.getElementById("st-overlay").style.display = "none";
   document.body.style.overflow = "";
 }
@@ -142,7 +141,6 @@ function stepStory(d) {
   var i = filtered.findIndex(function (s) { return s.id === curId; });
   if (i < 0) return;
   var n = filtered[(i + d + filtered.length) % filtered.length];
-  stopListen();
   curId = n.id;
   renderReader();
   document.getElementById("st-overlay").scrollTop = 0;
@@ -158,45 +156,14 @@ function renderReader() {
     '<div class="st-moralbox"><b>' + T("st_moral") + ":</b> " + s.moral[L_] + "</div>" +
     '<div class="st-body">' + s.text[L_] + "</div>" +
     '<div class="st-modal-nav">' +
-    '<button class="btn btn-gold" id="st-listenbtn" onclick="toggleListen()">🔊 ' + T("st_listen") + "</button>" +
-    '<button class="btn btn-outline" onclick="stepStory(-1)"' + prevDis + ">" + T("st_prev") + "</button>" +
+        '<button class="btn btn-outline" onclick="stepStory(-1)"' + prevDis + ">" + T("st_prev") + "</button>" +
     '<button class="btn btn-outline" onclick="stepStory(1)"' + prevDis + ">" + T("st_next") + "</button>" +
     '<button class="btn btn-outline" onclick="closeStory()">' + T("st_close") + "</button></div>";
-}
-var speaking = false;
-function toggleListen() {
-  if (speaking) { stopListen(); return; }
-  var s = window.STORIES[curId - 1];
-  var L_ = L();
-  if (!("speechSynthesis" in window)) return;
-  var u = new SpeechSynthesisUtterance(s.title[L_] + ". " + s.text[L_]);
-  u.lang = L_ === "hi" ? "hi-IN" : L_ === "ne" ? "ne-NP" : "en-IN";
-  u.rate = 0.95;
-  try {
-    var vs = speechSynthesis.getVoices();
-    for (var i = 0; i < vs.length; i++) {
-      if (vs[i].lang && vs[i].lang.toLowerCase().indexOf(u.lang.slice(0, 2)) === 0) { u.voice = vs[i]; break; }
-    }
-  } catch (e) {}
-  u.onend = function () { speaking = false; paintListenBtn(); };
-  speaking = true;
-  speechSynthesis.cancel();
-  speechSynthesis.speak(u);
-  paintListenBtn();
-}
-function stopListen() {
-  if ("speechSynthesis" in window) speechSynthesis.cancel();
-  speaking = false;
-  paintListenBtn();
-}
-function paintListenBtn() {
-  var b = document.getElementById("st-listenbtn");
-  if (b) b.innerHTML = speaking ? "⏹ " + T("st_stop") : "🔊 " + T("st_listen");
 }
 window.onLangChange = function () {
   initFilters();
   pickTheme(selTheme);
-  if (document.getElementById("st-overlay").style.display === "flex") { stopListen(); renderReader(); }
+  if (document.getElementById("st-overlay").style.display === "flex") { renderReader(); }
 };
 document.addEventListener("DOMContentLoaded", function () {
   initFilters();
