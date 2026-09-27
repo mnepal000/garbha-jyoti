@@ -430,7 +430,11 @@ function nakMatch(x){
 }
 
 buildChips();
-window.onLangChange = function () { buildChips(); render(); };
+window.onLangChange = function () {
+  buildChips(); render();
+  if (document.getElementById("mixOut").innerHTML && document.getElementById("mixF").value.trim() && document.getElementById("mixM").value.trim()) doMix();
+  if (document.getElementById("nakOut").innerHTML && document.getElementById("nakD").value) doNak();
+};
 render();
 </script>
 </body>
