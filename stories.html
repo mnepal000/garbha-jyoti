@@ -92,11 +92,15 @@ function pickTheme(th) {
   });
   renderStories();
 }
+function themeLabels(th) {
+  var o = (window.I18N.STR && window.I18N.STR["th_" + th]) || {};
+  return (o.hi || "") + " " + (o.en || "") + " " + (o.ne || "");
+}
 function storyMatches(s, q) {
   q = q.trim().toLowerCase();
   if (!q) return true;
   var L_ = L();
-  return (s.title.hi + " " + s.title.en + " " + s.title.ne + " " + s.text[L_]).toLowerCase().indexOf(q) >= 0;
+  return (s.title.hi + " " + s.title.en + " " + s.title.ne + " " + s.text[L_] + " " + themeLabels(s.th)).toLowerCase().indexOf(q) >= 0;
 }
 function renderStories() {
   var L_ = L();
