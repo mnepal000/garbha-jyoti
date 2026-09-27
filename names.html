@@ -102,8 +102,42 @@
       <div id="mixOut"></div>
     </div>
 
-    <div class="prose" style="margin-top: 40px;">
-      <p style="text-align:center; color: var(--muted);" data-i18n="soon_names"></p>
+    <div class="mixer">
+      <h3 data-i18n="nak_title"></h3>
+      <p class="sub" data-i18n="nak_sub"></p>
+      <div class="mix-form">
+        <div class="mix-field">
+          <label for="nakD" data-i18n="nak_date"></label>
+          <input type="date" id="nakD">
+        </div>
+        <div class="mix-field">
+          <label for="nakT" data-i18n="nak_time"></label>
+          <input type="time" id="nakT" value="12:00">
+        </div>
+        <div class="mix-field">
+          <label for="nakTZ" data-i18n="nak_tz"></label>
+          <select id="nakTZ" class="sortsel">
+            <option value="345" selected>Kathmandu (+5:45)</option>
+            <option value="330">Kolkata / Delhi (+5:30)</option>
+            <option value="360">Dhaka (+6:00)</option>
+            <option value="300">Karachi (+5:00)</option>
+            <option value="240">Dubai (+4:00)</option>
+            <option value="180">Moscow (+3:00)</option>
+            <option value="60">Paris / Berlin (+1:00)</option>
+            <option value="0">London (+0:00)</option>
+            <option value="-300">New York (-5:00)</option>
+            <option value="-360">Chicago (-6:00)</option>
+            <option value="-420">Denver (-7:00)</option>
+            <option value="-480">Los Angeles (-8:00)</option>
+            <option value="600">Sydney (+10:00)</option>
+          </select>
+        </div>
+        <div class="mix-field">
+          <label>&nbsp;</label>
+          <button class="mix-go" onclick="doNak()" data-i18n="nak_go"></button>
+        </div>
+      </div>
+      <div id="nakOut"></div>
     </div>
   </div>
 </section>
@@ -160,6 +194,7 @@ function filtered() {
   var raw = document.getElementById("q").value.trim();
   var q = raw.toLowerCase();
   var list = window.NAMES.filter(function (x) {
+    if (nakActive && !nakMatch(x)) return false;
     if (curG !== "all" && x.g !== curG && x.g !== "both") return false;
     if (curL !== "all" && x.n.charAt(0).toUpperCase() !== curL) return false;
     if (curS !== "all") {
@@ -186,7 +221,7 @@ function card(x) {
     '</div><div class="mn">' + x.m[L] + '</div><div class="tags">' + tags + "</div></div>";
 }
 
-function onFilter() { curPage = 0; render(); }
+function onFilter() { curPage = 0; nakActive = false; render(); }
 
 function render() {
   var list = filtered();
@@ -279,6 +314,119 @@ function doMix() {
       }).join("") + "</div>";
   }
   out.innerHTML = html || '<p class="soon">' + T("no_res") + "</p>";
+}
+
+/* ---------- nakshatra finder ---------- */
+var NAKSH = [
+ {n:{hi:"अश्विनी",en:"Ashwini",ne:"अश्विनी"}, s:[["chu","चु"],["che","चे"],["cho","चो"],["la","ल"]]},
+ {n:{hi:"भरणी",en:"Bharani",ne:"भरणी"}, s:[["li","लि"],["lu","लु"],["le","ले"],["lo","लो"]]},
+ {n:{hi:"कृत्तिका",en:"Krittika",ne:"कृत्तिका"}, s:[["a","अ"],["i","इ"],["u","उ"],["e","ए"]]},
+ {n:{hi:"रोहिणी",en:"Rohini",ne:"रोहिणी"}, s:[["o","ओ"],["va","व"],["vi","वि"],["vu","वु"]]},
+ {n:{hi:"मृगशीर्ष",en:"Mrigashira",ne:"मृगशिरा"}, s:[["ve","वे"],["vo","वो"],["ka","क"],["ki","कि"]]},
+ {n:{hi:"आर्द्रा",en:"Ardra",ne:"आर्द्रा"}, s:[["ku","कु"],["kha","ख"],["nga","ङ"],["chha","छ"]]},
+ {n:{hi:"पुनर्वसु",en:"Punarvasu",ne:"पुनर्वसु"}, s:[["ke","के"],["ko","को"],["ha","ह"],["hi","हि"]]},
+ {n:{hi:"पुष्य",en:"Pushya",ne:"पुष्य"}, s:[["hu","हु"],["he","हे"],["ho","हो"],["da","द"]]},
+ {n:{hi:"आश्लेषा",en:"Ashlesha",ne:"आश्लेषा"}, s:[["di","दि"],["du","दु"],["de","दे"],["do","दो"]]},
+ {n:{hi:"मघा",en:"Magha",ne:"मघा"}, s:[["ma","म"],["mi","मि"],["mu","मु"],["me","मे"]]},
+ {n:{hi:"पूर्व फाल्गुनी",en:"Purva Phalguni",ne:"पूर्वफाल्गुनी"}, s:[["mo","मो"],["ta","त"],["ti","ति"],["tu","तु"]]},
+ {n:{hi:"उत्तर फाल्गुनी",en:"Uttara Phalguni",ne:"उत्तरफाल्गुनी"}, s:[["te","ते"],["to","तो"],["pa","प"],["pi","पि"]]},
+ {n:{hi:"हस्त",en:"Hasta",ne:"हस्त"}, s:[["pu","पु"],["sha","ष"],["na","ण"],["tha","ठ"]]},
+ {n:{hi:"चित्रा",en:"Chitra",ne:"चित्रा"}, s:[["pe","पे"],["po","पो"],["ra","र"],["ri","रि"]]},
+ {n:{hi:"स्वाति",en:"Swati",ne:"स्वाति"}, s:[["ru","रु"],["re","रे"],["ro","रो"],["ta","त"]]},
+ {n:{hi:"विशाखा",en:"Vishakha",ne:"विशाखा"}, s:[["ti","ति"],["tu","तु"],["te","ते"],["to","तो"]]},
+ {n:{hi:"अनुराधा",en:"Anuradha",ne:"अनुराधा"}, s:[["na","न"],["ni","नि"],["nu","नु"],["ne","ने"]]},
+ {n:{hi:"ज्येष्ठा",en:"Jyeshtha",ne:"ज्येष्ठा"}, s:[["no","नो"],["ya","य"],["yi","यि"],["yu","यु"]]},
+ {n:{hi:"मूल",en:"Mula",ne:"मूल"}, s:[["ye","ये"],["yo","यो"],["bha","भ"],["bhi","भि"]]},
+ {n:{hi:"पूर्वाषाढ़ा",en:"Purva Ashadha",ne:"पूर्वाषाढा"}, s:[["bhu","भु"],["dha","धा"],["pha","फा"],["dha","ढा"]]},
+ {n:{hi:"उत्तराषाढ़ा",en:"Uttara Ashadha",ne:"उत्तराषाढा"}, s:[["bhe","भे"],["bho","भो"],["ja","ज"],["ji","जि"]]},
+ {n:{hi:"श्रवण",en:"Shravana",ne:"श्रवण"}, s:[["khi","खि"],["khu","खु"],["khe","खे"],["kho","खो"]]},
+ {n:{hi:"धनिष्ठा",en:"Dhanishta",ne:"धनिष्ठा"}, s:[["ga","ग"],["gi","गि"],["gu","गु"],["ge","गे"]]},
+ {n:{hi:"शतभिषा",en:"Shatabhisha",ne:"शतभिषा"}, s:[["go","गो"],["sa","स"],["si","सि"],["su","सु"]]},
+ {n:{hi:"पूर्व भाद्रपद",en:"Purva Bhadrapada",ne:"पूर्वभाद्रपद"}, s:[["se","से"],["so","सो"],["da","द"],["di","दि"]]},
+ {n:{hi:"उत्तर भाद्रपद",en:"Uttara Bhadrapada",ne:"उत्तरभाद्रपद"}, s:[["du","दु"],["tha","थ"],["jha","झ"],["na","ञ"]]},
+ {n:{hi:"रेवती",en:"Revati",ne:"रेवती"}, s:[["de","दे"],["du","दु"],["cha","च"],["chi","चि"]]}
+];
+var RASHI = [
+ {hi:"मेष",en:"Mesha",ne:"मेष"},{hi:"वृषभ",en:"Vrishabha",ne:"वृषभ"},
+ {hi:"मिथुन",en:"Mithuna",ne:"मिथुन"},{hi:"कर्क",en:"Karka",ne:"कर्कट"},
+ {hi:"सिंह",en:"Simha",ne:"सिंह"},{hi:"कन्या",en:"Kanya",ne:"कन्या"},
+ {hi:"तुला",en:"Tula",ne:"तुला"},{hi:"वृश्चिक",en:"Vrishchika",ne:"वृश्चिक"},
+ {hi:"धनु",en:"Dhanu",ne:"धनु"},{hi:"मकर",en:"Makara",ne:"मकर"},
+ {hi:"कुंभ",en:"Kumbha",ne:"कुम्भ"},{hi:"मीन",en:"Meena",ne:"मीन"}
+];
+function d2r(d){return d*Math.PI/180;}
+function rev360(x){x%=360;return x<0?x+360:x;}
+function sind(d){return Math.sin(d2r(d));}
+function cosd(d){return Math.cos(d2r(d));}
+/* Moon's sidereal longitude (Lahiri), Schlyter's algorithm. y,mo,d calendar; uth = UT hours (may exceed 24 / be negative). */
+function moonSidereal(y, mo, d, uth) {
+  var Y=y, M=mo;
+  if (M<=2){Y-=1;M+=12;}
+  var A=Math.floor(Y/100), B=2-A+Math.floor(A/4);
+  var jd0=Math.floor(365.25*(Y+4716))+Math.floor(30.6001*(M+1))+d+B-1524.5;
+  /* Schlyter's day count starts at 2000 Jan 0.0 (= 1999 Dec 31 0h UT), i.e. JD 2451543.5 */
+  var dd=jd0-2451543.5+uth/24;
+  var N=rev360(125.1228-0.0529538083*dd), inc=5.1454;
+  var w=rev360(318.0634+0.1643573223*dd), a=60.2666, e=0.054900;
+  var Mm=rev360(115.3654+13.0649929509*dd);
+  var E=Mm+(180/Math.PI)*e*sind(Mm)*(1+e*cosd(Mm)), E1, k;
+  for(k=0;k<4;k++){E1=E-(E-(180/Math.PI)*e*sind(E)-Mm)/(1-e*cosd(E));E=E1;}
+  var xv=a*(cosd(E)-e), yv=a*Math.sqrt(1-e*e)*sind(E);
+  var v=r2d(Math.atan2(yv,xv)), r=Math.sqrt(xv*xv+yv*yv);
+  var xh=r*(cosd(N)*cosd(v+w)-sind(N)*sind(v+w)*cosd(inc));
+  var yh=r*(sind(N)*cosd(v+w)+cosd(N)*sind(v+w)*cosd(inc));
+  var zh=r*(sind(v+w)*sind(inc));
+  var lon=rev360(r2d(Math.atan2(yh,xh)));
+  var Ms=rev360(356.0470+0.9856002585*dd);
+  var Ls=rev360(Ms+282.9404+4.70935E-5*dd);
+  var Lm=rev360(N+w+Mm), Dm=rev360(Lm-Ls), F=rev360(Lm-N);
+  lon+= -1.274*sind(Mm-2*Dm)+0.658*sind(2*Dm)-0.186*sind(Ms)-0.059*sind(2*Mm-2*Dm)-0.057*sind(Mm-2*Dm+Ms);
+  lon=rev360(lon);
+  var ayan=23.853+(dd-1.5)*(50.2795/3600/365.25);
+  return rev360(lon-ayan);
+}
+function r2d(r){return r*180/Math.PI;}
+var nakSyls=null, nakActive=false;
+function doNak(){
+  var dv=document.getElementById("nakD").value, tv=document.getElementById("nakT").value||"12:00";
+  var tz=parseInt(document.getElementById("nakTZ").value,10);
+  var out=document.getElementById("nakOut");
+  if(!dv){out.innerHTML='<p class="soon">'+T("nak_need")+"</p>";return;}
+  var p=dv.split("-"), q=tv.split(":");
+  var uth=parseInt(q[0],10)+parseInt(q[1],10)/60-tz/60;
+  var slon=moonSidereal(parseInt(p[0],10),parseInt(p[1],10),parseInt(p[2],10),uth);
+  var span=360/27, ni=Math.floor(slon/span)%27;
+  var pada=Math.floor((slon-ni*span)/(span/4))+1;
+  var ri=Math.floor(slon/30)%12;
+  var L=window.I18N.lang, nk=NAKSH[ni];
+  nakSyls=nk.s;
+  var chips=nk.s.map(function(s,i){
+    return '<span class="chip'+(i===pada-1?" sel":"")+'" style="cursor:default">'+s[0]+" · "+s[1]+"</span>";
+  }).join("");
+  out.innerHTML=
+    '<div class="mix-note" style="margin-top:18px"><b>'+T("nak_lb_nak")+":</b> "+nk.n[L]+" ("+nk.n.en+") &nbsp;·&nbsp; <b>"+T("nak_lb_pada")+":</b> "+pada+" &nbsp;·&nbsp; <b>"+T("nak_lb_rashi")+":</b> "+RASHI[ri][L]+"</div>"+
+    '<div class="mix-sec-t">'+T("nak_lb_syl")+'</div>'+
+    '<div class="chips" style="justify-content:flex-start;margin-bottom:6px">'+chips+"</div>"+
+    '<div class="mix-note">'+T("nak_yours")+": <b>"+nk.s[pada-1][0]+" · "+nk.s[pada-1][1]+"</b></div>"+
+    '<button class="mix-go" onclick="nakShowNames()">'+T("nak_show")+"</button> "+
+    '<button class="mix-go" style="background:#fff;color:var(--maroon);border:1px solid var(--line);margin-left:8px" onclick="nakClear()">'+T("nak_clear")+"</button> "+
+    '<div class="mix-note" style="margin-top:12px">'+T("nak_approx")+"</div>";
+}
+function nakShowNames(){
+  nakActive=true; curG="all"; curL="all"; curS="all"; curPage=0;
+  document.getElementById("q").value="";
+  document.querySelectorAll(".filters .pill").forEach(function(p){p.classList.toggle("sel",p.getAttribute("data-g")==="all");});
+  buildChips(); render();
+  document.getElementById("grid").scrollIntoView({behavior:"smooth"});
+}
+function nakClear(){nakActive=false;render();}
+function nakMatch(x){
+  if(!nakSyls) return false;
+  var nl=x.n.toLowerCase();
+  for(var i=0;i<nakSyls.length;i++){
+    if(nl.indexOf(nakSyls[i][0])===0||x.d.indexOf(nakSyls[i][1])===0) return true;
+  }
+  return false;
 }
 
 buildChips();
