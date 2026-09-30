@@ -98,6 +98,7 @@ window.I18N = {
     st_read: { hi: "कथा पढ़ें", en: "Read story", ne: "कथा पढ्नुहोस्" },
     st_moral: { hi: "सीख", en: "Moral", ne: "नैतिक" },
     st_listen: { hi: "सुनें", en: "Listen", ne: "सुन्नुहोस्" },
+    st_watch: { hi: "वीडियो देखें", en: "Watch video", ne: "भिडियो हेर्नुहोस्" },
     st_stop: { hi: "रोकें", en: "Stop", ne: "रोक्नुहोस्" },
     st_prev: { hi: "← पिछली", en: "← Previous", ne: "← अघिल्लो" },
     st_next: { hi: "अगली →", en: "Next →", ne: "अर्को →" },
