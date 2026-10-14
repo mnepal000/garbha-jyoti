@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>शुभ मुहूर्त | गर्भ ज्योति</title>
+<meta name="description" content="नियोजित प्रसव के लिए शुभ दिन और समय: तिथि, नक्षत्र, योग, लग्न और अंकशास्त्र।">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="assets/img/logo.png">
+<style>
+.mu-disc { background: #fdf6ec; border: 2px solid var(--gold); border-radius: 14px; padding: 20px 22px; margin: 0 auto 30px; max-width: 860px; }
+.mu-disc h3 { margin: 0 0 10px; color: var(--maroon); font-size: 20px; text-align: center; }
+.mu-disc p { margin: 8px 0; font-size: 15px; line-height: 1.65; }
+.mu-form { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 24px; max-width: 860px; margin: 0 auto 30px; }
+.mu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px; }
+.mu-field label { display: block; font-weight: 700; font-size: 14px; margin-bottom: 6px; color: var(--maroon); }
+.mu-field input, .mu-field select { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 15px; font-family: inherit; background: #fff; }
+.mu-sec { font-weight: 700; color: var(--maroon); margin: 18px 0 10px; font-size: 16px; }
+.mu-center { text-align: center; margin-top: 20px; }
+.mu-day { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; margin: 0 auto 18px; max-width: 860px; }
+.mu-dayhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.mu-date { font-size: 21px; font-weight: 700; color: var(--maroon); }
+.mu-verdict { font-size: 14px; font-weight: 700; border-radius: 999px; padding: 5px 14px; }
+.mu-v-uttam { background: #e7f6e7; color: #1d6b1d; border: 1px solid #bfe3bf; }
+.mu-v-shubh { background: #fdf3e0; color: #8a5a00; border: 1px solid #f0dcae; }
+.mu-v-madhyam { background: #f1f1f1; color: #555; border: 1px solid #ddd; }
+.mu-v-avoid { background: #fdecea; color: #a02020; border: 1px solid #f5c6c0; }
+.mu-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 12px 0; }
+.mu-fact { background: var(--cream2); border-radius: 10px; padding: 8px 12px; font-size: 14px; }
+.mu-fact b { display: block; font-size: 12px; color: var(--muted); font-weight: 600; }
+.mu-avoidbox { background: #fdf1ef; border-radius: 10px; padding: 10px 14px; font-size: 14px; margin: 10px 0; }
+.mu-win { background: #f2f9f0; border: 1px solid #cfe6c9; border-radius: 10px; padding: 10px 14px; font-size: 15px; margin: 8px 0; }
+.mu-win b { color: #1d6b1d; }
+.mu-why { font-size: 13px; color: var(--muted); margin-top: 10px; }
+.mu-why summary { cursor: pointer; font-weight: 700; }
+.mu-how { max-width: 860px; margin: 10px auto 0; background: var(--cream2); border-radius: 14px; padding: 20px 22px; }
+.mu-how h3 { margin-top: 0; color: var(--maroon); }
+.mu-how p { font-size: 15px; line-height: 1.65; }
+#mu-msg { text-align: center; font-weight: 700; color: #a02020; min-height: 26px; margin: 6px 0; }
+</style>
+</head>
+<body>
+<script src="assets/i18n.min.js?v=10"></script>
+<script src="assets/site.min.js?v=10"></script>
+<script src="assets/muhurta.min.js?v=10"></script>
+
+<section class="block" style="padding-top: 44px;">
+  <div class="wrap">
+    <h2 style="font-size: 40px;" data-i18n="mu_title"></h2>
+    <p class="sub" data-i18n="mu_sub"></p>
+
+    <div class="mu-disc">
+      <h3 data-i18n="mu_disc_t"></h3>
+      <p data-i18n="mu_disc_med"></p>
+      <p data-i18n="mu_disc_astro"></p>
+    </div>
+
+    <div class="mu-form">
+      <div class="mu-grid">
+        <div class="mu-field"><label data-i18n="mu_from"></label><input type="date" id="mu-from"></div>
+        <div class="mu-field"><label data-i18n="mu_to"></label><input type="date" id="mu-to"></div>
+        <div class="mu-field"><label data-i18n="mu_tz"></label><select id="mu-tz"></select></div>
+        <div class="mu-field"><label data-i18n="mu_city"></label><select id="mu-city"></select></div>
+      </div>
+      <div class="mu-sec" data-i18n="mu_custom"></div>
+      <div class="mu-grid">
+        <div class="mu-field"><label data-i18n="mu_lat"></label><input type="number" id="mu-lat" step="0.01" value="39.03"></div>
+        <div class="mu-field"><label data-i18n="mu_lon"></label><input type="number" id="mu-lon" step="0.01" value="-76.91"></div>
+      </div>
+      <div class="mu-sec" data-i18n="mu_mom_t"></div>
+      <div class="mu-grid">
+        <div class="mu-field"><label data-i18n="mu_mom_nak"></label><select id="mu-momnak"></select></div>
+        <div class="mu-field"><label data-i18n="mu_mom_rashi"></label><select id="mu-momrashi"></select></div>
+      </div>
+      <div class="mu-center">
+        <button class="btn btn-gold" onclick="calcMuhurta()" data-i18n="mu_btn"></button>
+        <p id="mu-msg"></p>
+      </div>
+    </div>
+
+    <div id="mu-results"></div>
+
+    <div class="mu-how">
+      <h3 data-i18n="mu_how_t"></h3>
+      <p data-i18n="mu_how_d"></p>
+      <p data-i18n="mu_win_note"></p>
+    </div>
+  </div>
+</section>
+
+<script>
+function T(k, v) { return window.I18N.t(k, v); }
+function L() { return window.I18N.lang; }
+
+var MU_TZ = [
+  ["America/New_York", "US Eastern (New York)"], ["America/Chicago", "US Central (Chicago)"],
+  ["America/Denver", "US Mountain (Denver)"], ["America/Los_Angeles", "US Pacific (Los Angeles)"],
+  ["America/Anchorage", "Alaska"], ["Pacific/Honolulu", "Hawaii"],
+  ["America/Toronto", "Toronto"], ["America/Vancouver", "Vancouver"],
+  ["Europe/London", "London"], ["Europe/Paris", "Paris"], ["Europe/Berlin", "Berlin"],
+  ["Asia/Dubai", "Dubai"], ["Asia/Kathmandu", "Kathmandu"], ["Asia/Kolkata", "Kolkata / Delhi"],
+  ["Asia/Singapore", "Singapore"], ["Asia/Bangkok", "Bangkok"], ["Asia/Tokyo", "Tokyo"],
+  ["Australia/Sydney", "Sydney"], ["Australia/Melbourne", "Melbourne"], ["Pacific/Auckland", "Auckland"]
+];
+var MU_CITIES = [
+  ["Beltsville, MD", 39.03, -76.91, "America/New_York"],
+  ["Washington, DC", 38.90, -77.04, "America/New_York"],
+  ["New York", 40.71, -74.00, "America/New_York"],
+  ["Chicago", 41.88, -87.63, "America/Chicago"],
+  ["Houston", 29.76, -95.37, "America/Chicago"],
+  ["Los Angeles", 34.05, -118.24, "America/Los_Angeles"],
+  ["Toronto", 43.65, -79.38, "America/Toronto"],
+  ["London", 51.50, -0.13, "Europe/London"],
+  ["Dubai", 25.20, 55.27, "Asia/Dubai"],
+  ["Kathmandu", 27.72, 85.32, "Asia/Kathmandu"],
+  ["Delhi", 28.61, 77.21, "Asia/Kolkata"],
+  ["Mumbai", 19.08, 72.88, "Asia/Kolkata"],
+  ["Sydney", -33.87, 151.21, "Australia/Sydney"]
+];
+
+function fillSelects() {
+  var tz = document.getElementById("mu-tz");
+  tz.innerHTML = MU_TZ.map(function (z) {
+    return '<option value="' + z[0] + '"' + (z[0] === "America/New_York" ? " selected" : "") + ">" + z[1] + "</option>";
+  }).join("");
+  var city = document.getElementById("mu-city");
+  city.innerHTML = MU_CITIES.map(function (c, i) {
+    return '<option value="' + i + '"' + (i === 0 ? " selected" : "") + ">" + c[0] + "</option>";
+  }).join("");
+  city.addEventListener("change", function () {
+    var c = MU_CITIES[+city.value];
+    document.getElementById("mu-lat").value = c[1];
+    document.getElementById("mu-lon").value = c[2];
+    tz.value = c[3];
+  });
+  var mn = document.getElementById("mu-momnak");
+  mn.innerHTML = '<option value="">' + T("mu_notset") + "</option>" +
+    window.MUHURTA.NAK_NAMES.map(function (n, i) { return '<option value="' + i + '">' + n + "</option>"; }).join("");
+  var mr = document.getElementById("mu-momrashi");
+  mr.innerHTML = '<option value="">' + T("mu_notset") + "</option>" +
+    window.MUHURTA.RASHI_NAMES.map(function (n, i) { return '<option value="' + i + '">' + n + "</option>"; }).join("");
+}
+
+function fmtDate(y, mo, d, tz) {
+  var loc = L() === "ne" ? "ne-NP" : L() === "en" ? "en-US" : "hi-IN";
+  return new Intl.DateTimeFormat(loc, { timeZone: tz, weekday: "long", day: "numeric", month: "long", year: "numeric" })
+    .format(new Date(window.MUHURTA.localToUTC(tz, y, mo, d, 12, 0)));
+}
+
+function verdictClass(v) { return "mu-v-" + v; }
+
+function calcMuhurta() {
+  var msg = document.getElementById("mu-msg");
+  msg.textContent = "";
+  var f = document.getElementById("mu-from").value, t = document.getElementById("mu-to").value;
+  if (!f || !t) { msg.textContent = T("mu_err_dates"); return; }
+  var fp = f.split("-").map(Number), tp = t.split("-").map(Number);
+  var days = Math.round((Date.UTC(tp[0], tp[1] - 1, tp[2]) - Date.UTC(fp[0], fp[1] - 1, fp[2])) / 86400000);
+  if (days < 0 || days > 45) { msg.textContent = T("mu_err_range"); return; }
+  var tz = document.getElementById("mu-tz").value;
+  var lat = parseFloat(document.getElementById("mu-lat").value);
+  var lon = parseFloat(document.getElementById("mu-lon").value);
+  var momNak = document.getElementById("mu-momnak").value;
+  var momRashi = document.getElementById("mu-momrashi").value;
+  var res = window.MUHURTA.compute({
+    fromY: fp[0], fromMo: fp[1], fromD: fp[2], toY: tp[0], toMo: tp[1], toD: tp[2],
+    tz: tz, lat: lat, lon: lon,
+    momNak: momNak === "" ? null : +momNak, momRashi: momRashi === "" ? null : +momRashi
+  });
+  renderResults(res, tz);
+}
+
+function fact(label, val) {
+  return '<div class="mu-fact"><b>' + label + "</b>" + val + "</div>";
+}
+
+function renderResults(days, tz) {
+  var box = document.getElementById("mu-results");
+  var M = window.MUHURTA, lang = L();
+  var html = '<p class="sub" style="margin-bottom:20px;">' + T("mu_best") + " (" + days.length + ")</p>";
+  html += days.map(function (d) {
+    var pg = d.pg;
+    var vLabel = { uttam: T("mu_v_uttam"), shubh: T("mu_v_shubh"), madhyam: T("mu_v_madhyam"), avoid: T("mu_v_avoid") }[d.verdict];
+    var h = '<div class="mu-day"><div class="mu-dayhead"><div class="mu-date">' + fmtDate(d.y, d.mo, d.d, tz) + "</div>" +
+      '<div><span class="mu-verdict ' + verdictClass(d.verdict) + '">' + vLabel + '</span> ' +
+      '<span style="font-size:13px;color:var(--muted);">' + T("mu_score") + ": " + d.score + "</span></div></div>";
+    h += '<div class="mu-facts">';
+    h += fact(T("mu_tithi"), pg.tithiName + " (" + T(pg.paksha === "shukla" ? "mu_paksha_shukla" : "mu_paksha_krishna") + ")");
+    h += fact(T("mu_vara"), M.VARA_NAMES[lang][d.weekday]);
+    h += fact(T("mu_nak"), pg.nakName + " (pada " + pg.pada + ")");
+    h += fact(T("mu_yoga"), pg.yogaName);
+    h += fact(T("mu_karana"), pg.karanaName);
+    h += fact(T("mu_num"), d.numRoot + " (" + (d.numRoot === 4 || d.numRoot === 8 ? T("mu_unfav") : [1, 3, 5, 6, 9].indexOf(d.numRoot) >= 0 ? T("mu_fav") : T("mu_neu")) + ")");
+    if (d.tara) h += fact(T("mu_tara"), M.TARA_NAMES[d.tara - 1] + " (" + ([2, 4, 6, 8, 9].indexOf(d.tara) >= 0 ? T("mu_fav") : T("mu_unfav")) + ")");
+    if (d.chandra) h += fact(T("mu_chandra"), ([1, 3, 6, 7, 10, 11].indexOf(d.chandra) >= 0 ? T("mu_fav") : T("mu_unfav")));
+    h += "</div>";
+    h += '<div class="mu-avoidbox"><b>' + T("mu_avoid_t") + ":</b> " +
+      T("mu_rahu") + " " + M.fmtTime(tz, d.inausp.rahu.from) + "–" + M.fmtTime(tz, d.inausp.rahu.to) + " · " +
+      T("mu_yama") + " " + M.fmtTime(tz, d.inausp.yama.from) + "–" + M.fmtTime(tz, d.inausp.yama.to) + " · " +
+      T("mu_rise") + " " + M.fmtTime(tz, d.sunrise) + " · " + T("mu_set") + " " + M.fmtTime(tz, d.sunset) + "</div>";
+    if (d.windows.length) {
+      h += '<div><b>' + T("mu_win_t") + ":</b></div>";
+      d.windows.forEach(function (w) {
+        h += '<div class="mu-win"><b>' + M.fmtTime(tz, w.from) + " – " + M.fmtTime(tz, w.to) + "</b> · " +
+          T("mu_lagna") + ": " + w.lagnaName + "</div>";
+      });
+    }
+    if (d.pts.length) {
+      h += '<details class="mu-why"><summary>' + T("mu_why") + "</summary><div>" +
+        d.pts.map(function (p) { return (p.n > 0 ? "+" : "") + p.n + " " + p.label; }).join(" · ") + "</div></details>";
+    }
+    return h + "</div>";
+  }).join("");
+  box.innerHTML = html;
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  fillSelects();
+  window.onLangChange = function () { fillSelects(); };
+});
+</script>
+
+</body>
+</html>
