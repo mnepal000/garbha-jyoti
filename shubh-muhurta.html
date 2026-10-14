@@ -43,9 +43,9 @@
 </style>
 </head>
 <body>
-<script src="assets/i18n.min.js?v=12"></script>
-<script src="assets/site.min.js?v=12"></script>
-<script src="assets/muhurta.min.js?v=12"></script>
+<script src="assets/i18n.min.js?v=13"></script>
+<script src="assets/site.min.js?v=13"></script>
+<script src="assets/muhurta.min.js?v=13"></script>
 
 <section class="block" style="padding-top: 44px;">
   <div class="wrap">
@@ -64,6 +64,13 @@
         <div class="mu-field"><label data-i18n="mu_to"></label><input type="date" id="mu-to"></div>
         <div class="mu-field"><label data-i18n="mu_tz"></label><select id="mu-tz"></select></div>
         <div class="mu-field"><label data-i18n="mu_city"></label><select id="mu-city"></select></div>
+        <div class="mu-field"><label data-i18n="mu_addr"></label>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="mu-addr" style="flex:1;min-width:0;">
+            <button class="btn btn-gold" type="button" onclick="findAddress()" data-i18n="mu_find" style="white-space:nowrap;padding:10px 16px;"></button>
+          </div>
+          <div id="mu-addr-msg" style="font-size:13px;color:var(--muted);margin-top:6px;min-height:18px;"></div>
+        </div>
       </div>
       <div class="mu-sec" data-i18n="mu_custom"></div>
       <div class="mu-grid">
@@ -226,6 +233,25 @@ var MU_PTS_LABELS = {
 };
 function ptLabel(k) { var m = MU_PTS_LABELS[k]; return m ? m[L()] : k; }
 
+// Address lookup via OpenStreetMap Nominatim (free, no key needed).
+// Fills latitude/longitude so sunrise, Rahu Kalam and lagna match the hospital.
+function findAddress() {
+  var q = document.getElementById("mu-addr").value.trim();
+  var msg = document.getElementById("mu-addr-msg");
+  if (!q) return;
+  msg.textContent = "...";
+  fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" + encodeURIComponent(q))
+    .then(function (r) { return r.json(); })
+    .then(function (arr) {
+      if (arr && arr.length) {
+        document.getElementById("mu-lat").value = (+arr[0].lat).toFixed(2);
+        document.getElementById("mu-lon").value = (+arr[0].lon).toFixed(2);
+        msg.textContent = arr[0].display_name.split(",").slice(0, 3).join(",").trim();
+      } else { msg.textContent = T("mu_addr_none"); }
+    })
+    .catch(function () { msg.textContent = T("mu_addr_err"); });
+}
+
 function renderResults(days, tz) {
   var box = document.getElementById("mu-results");
   var M = window.MUHURTA, lang = L();
@@ -273,7 +299,14 @@ function renderResults(days, tz) {
 document.addEventListener("DOMContentLoaded", function () {
   fillSelects();
   syncDatePickers();
-  window.onLangChange = function () { fillSelects(); };
+  document.getElementById("mu-addr").placeholder = T("mu_addr_ph");
+  document.getElementById("mu-addr").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); findAddress(); }
+  });
+  window.onLangChange = function () {
+    fillSelects();
+    document.getElementById("mu-addr").placeholder = T("mu_addr_ph");
+  };
 });
 </script>
 
