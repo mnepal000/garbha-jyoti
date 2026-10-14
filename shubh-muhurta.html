@@ -43,9 +43,9 @@
 </style>
 </head>
 <body>
-<script src="assets/i18n.min.js?v=10"></script>
-<script src="assets/site.min.js?v=10"></script>
-<script src="assets/muhurta.min.js?v=10"></script>
+<script src="assets/i18n.min.js?v=11"></script>
+<script src="assets/site.min.js?v=11"></script>
+<script src="assets/muhurta.min.js?v=11"></script>
 
 <section class="block" style="padding-top: 44px;">
   <div class="wrap">
@@ -177,6 +177,51 @@ function fact(label, val) {
   return '<div class="mu-fact"><b>' + label + "</b>" + val + "</div>";
 }
 
+// Date pickers: keep the "to" calendar on the same month as "from" (and vice versa),
+// so picking a December window does not force scrolling from the current month.
+function syncDatePickers() {
+  var fromEl = document.getElementById("mu-from"), toEl = document.getElementById("mu-to");
+  fromEl.addEventListener("change", function () {
+    if (fromEl.value) {
+      toEl.min = fromEl.value;
+      if (toEl.value && toEl.value < fromEl.value) toEl.value = fromEl.value;
+    } else { toEl.removeAttribute("min"); }
+  });
+  toEl.addEventListener("focus", function () {
+    if (!toEl.value && fromEl.value) toEl.value = fromEl.value;
+  });
+  fromEl.addEventListener("focus", function () {
+    if (!fromEl.value && toEl.value) fromEl.value = toEl.value;
+  });
+}
+
+// Human-readable score breakdown labels
+var MU_PTS_LABELS = {
+  "paksha": { hi: "शुक्ल पक्ष", en: "Shukla paksha", ne: "शुक्ल पक्ष" },
+  "tithi-purnima": { hi: "पूर्णिमा", en: "Purnima", ne: "पूर्णिमा" },
+  "tithi-amavasya": { hi: "अमावस्या (बचें)", en: "Amavasya (avoid)", ne: "औंसी (बच्नुहोस्)" },
+  "tithi-rikta": { hi: "रिक्ता तिथि (बचें)", en: "Rikta tithi (avoid)", ne: "रिक्ता तिथि (बच्नुहोस्)" },
+  "tithi-good": { hi: "शुभ तिथि", en: "Auspicious tithi", ne: "शुभ तिथि" },
+  "tithi-ok": { hi: "तिथि ठीक", en: "Tithi OK", ne: "तिथि ठीक" },
+  "tithi-other": { hi: "तिथि कमजोर", en: "Weak tithi", ne: "कमजोर तिथि" },
+  "vara": { hi: "वार", en: "Weekday", ne: "बार" },
+  "nak-good": { hi: "शुभ नक्षत्र", en: "Auspicious nakshatra", ne: "शुभ नक्षत्र" },
+  "nak-bad": { hi: "नक्षत्र से बचें", en: "Avoid nakshatra", ne: "नक्षत्रबाट बच्नुहोस्" },
+  "gandmoola": { hi: "गंडमूल (बचें)", en: "Gandmoola pada (avoid)", ne: "गण्डमूल (बच्नुहोस्)" },
+  "yoga-good": { hi: "शुभ योग", en: "Auspicious yoga", ne: "शुभ योग" },
+  "yoga-bad": { hi: "योग से बचें", en: "Avoid yoga", ne: "योगबाट बच्नुहोस्" },
+  "karana-vishti": { hi: "विष्टि करण (बचें)", en: "Vishti karana (avoid)", ne: "विष्टि करण (बच्नुहोस्)" },
+  "karana-good": { hi: "शुभ करण", en: "Auspicious karana", ne: "शुभ करण" },
+  "tara-good": { hi: "तारा बल शुभ", en: "Tara bala favorable", ne: "तारा बल शुभ" },
+  "tara-bad": { hi: "तारा बल अशुभ", en: "Tara bala unfavorable", ne: "तारा बल अशुभ" },
+  "chandra-good": { hi: "चंद्र बल शुभ", en: "Chandra bala favorable", ne: "चन्द्र बल शुभ" },
+  "chandra-bad": { hi: "चंद्र बल कमजोर", en: "Chandra bala weak", ne: "चन्द्र बल कमजोर" },
+  "numero": { hi: "अंकशास्त्र", en: "Numerology", ne: "अंकशास्त्र" },
+  "sankranti": { hi: "संक्रांति (बचें)", en: "Sankranti (avoid)", ne: "संक्रान्ति (बच्नुहोस्)" },
+  "eclipse": { hi: "ग्रहण (बचें)", en: "Eclipse (avoid)", ne: "ग्रहण (बच्नुहोस्)" }
+};
+function ptLabel(k) { var m = MU_PTS_LABELS[k]; return m ? m[L()] : k; }
+
 function renderResults(days, tz) {
   var box = document.getElementById("mu-results");
   var M = window.MUHURTA, lang = L();
@@ -201,16 +246,19 @@ function renderResults(days, tz) {
       T("mu_rahu") + " " + M.fmtTime(tz, d.inausp.rahu.from) + "–" + M.fmtTime(tz, d.inausp.rahu.to) + " · " +
       T("mu_yama") + " " + M.fmtTime(tz, d.inausp.yama.from) + "–" + M.fmtTime(tz, d.inausp.yama.to) + " · " +
       T("mu_rise") + " " + M.fmtTime(tz, d.sunrise) + " · " + T("mu_set") + " " + M.fmtTime(tz, d.sunset) + "</div>";
+    if (d.abhijit) {
+      h += '<div class="mu-win"><b>' + T("mu_abhijit") + ": " + M.fmtTime(tz, d.abhijit.from) + " – " + M.fmtTime(tz, d.abhijit.to) + "</b></div>";
+    }
     if (d.windows.length) {
       h += '<div><b>' + T("mu_win_t") + ":</b></div>";
       d.windows.forEach(function (w) {
         h += '<div class="mu-win"><b>' + M.fmtTime(tz, w.from) + " – " + M.fmtTime(tz, w.to) + "</b> · " +
-          T("mu_lagna") + ": " + w.lagnaName + "</div>";
+          T("mu_lagna") + ": " + w.lagnaName + (w.hora ? " · " + T("mu_hora") + ": " + w.hora : "") + "</div>";
       });
     }
     if (d.pts.length) {
       h += '<details class="mu-why"><summary>' + T("mu_why") + "</summary><div>" +
-        d.pts.map(function (p) { return (p.n > 0 ? "+" : "") + p.n + " " + p.label; }).join(" · ") + "</div></details>";
+        d.pts.map(function (p) { return (p.n > 0 ? "+" : "") + p.n + " " + ptLabel(p.label); }).join(" · ") + "</div></details>";
     }
     return h + "</div>";
   }).join("");
@@ -219,6 +267,7 @@ function renderResults(days, tz) {
 
 document.addEventListener("DOMContentLoaded", function () {
   fillSelects();
+  syncDatePickers();
   window.onLangChange = function () { fillSelects(); };
 });
 </script>

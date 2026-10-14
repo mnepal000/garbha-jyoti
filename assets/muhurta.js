@@ -221,12 +221,22 @@ var GOOD_YOGA = { Ayushman: 1, Saubhagya: 1, Shobhana: 1, Sukarma: 1, Dhriti: 1,
   Shubha: 1, Shukla: 1, Brahma: 1, Indra: 1 };
 var BAD_YOGA = { Atiganda: 1, Shula: 1, Ganda: 1, Vyaghata: 1, Vajra: 1,
   Vyatipata: 1, Parigha: 1, Vaidhriti: 1 };
-var GOOD_TITHI = { 2: 1, 3: 1, 5: 1, 7: 1, 10: 1, 11: 1, 13: 1, 17: 1, 18: 1,
-  20: 1, 22: 1, 25: 1, 26: 1, 28: 1 };
+var GOOD_TITHI = { 2: 1, 3: 1, 5: 1, 7: 1, 10: 1, 11: 1, 12: 1, 13: 1, 17: 1, 18: 1,
+  20: 1, 22: 1, 25: 1, 26: 1, 27: 1, 28: 1 };
 var RIKTA = { 4: 1, 9: 1, 14: 1, 19: 1, 24: 1, 29: 1 };
 var GOOD_TARA = { 2: 1, 4: 1, 6: 1, 8: 1, 9: 1 };
 var BAD_TARA = { 1: 1, 3: 1, 5: 1, 7: 1 };
 var GOOD_CHANDRA = { 1: 1, 3: 1, 6: 1, 7: 1, 10: 1, 11: 1 };
+// Gandmoola: dosha is pada-specific (classical): 1st pada of Ashwini/Magha/Moola,
+// 4th pada of Ashlesha/Jyeshtha/Revati.
+var GANDMOOLA_PADA = { Ashwini: [1], Magha: [1], Moola: [1], Ashlesha: [4], Jyeshtha: [4], Revati: [4] };
+// Eclipse days (solar + umbral lunar), verified against astronomical tables.
+// Tradition avoids new beginnings, including planned birth, on these days.
+var ECLIPSE = {
+  "2026-02-17": 1, "2026-03-03": 1, "2026-08-12": 1, "2026-08-28": 1,
+  "2027-02-06": 1, "2027-08-02": 1,
+  "2028-01-12": 1, "2028-01-26": 1, "2028-07-06": 1, "2028-07-22": 1, "2028-12-31": 1
+};
 var STHIRA = { 1: 1, 4: 1, 7: 1, 10: 1 }; // Vrishabha, Simha, Vrishchika, Kumbha
 var DWISHVA = { 2: 1, 5: 1, 8: 1, 11: 1 };
 
@@ -244,7 +254,7 @@ function numScore(root) {
 }
 
 // ---------- Score one day ----------
-function scoreDay(pg, weekday, momNak, momRashi, y, mo, d) {
+function scoreDay(pg, weekday, momNak, momRashi, y, mo, d, extra) {
   var pts = [], score = 0;
   function add(n, label) { score += n; if (n !== 0) pts.push({ n: n, label: label }); }
 
@@ -254,7 +264,7 @@ function scoreDay(pg, weekday, momNak, momRashi, y, mo, d) {
   else if (t === 30) add(-3, "tithi-amavasya");
   else if (RIKTA[t]) add(-3, "tithi-rikta");
   else if (GOOD_TITHI[t]) add(3, "tithi-good");
-  else if (t === 1 || t === 6 || t === 12 || t === 16 || t === 21 || t === 27) add(1, "tithi-ok");
+  else if (t === 1 || t === 6 || t === 16 || t === 21) add(1, "tithi-ok");
   else add(-1, "tithi-other");
 
   var vd = [1, 2, 0, 2, 2, 2, -1][weekday]; // Sun..Sat
@@ -262,11 +272,14 @@ function scoreDay(pg, weekday, momNak, momRashi, y, mo, d) {
 
   if (GOOD_NAK[pg.nakName]) add(3, "nak-good");
   else if (BAD_NAK[pg.nakName]) add(-3, "nak-bad");
+  var gmp = GANDMOOLA_PADA[pg.nakName];
+  if (gmp && gmp.indexOf(pg.pada) >= 0) add(-4, "gandmoola");
 
   if (GOOD_YOGA[pg.yogaName]) add(1, "yoga-good");
   else if (BAD_YOGA[pg.yogaName]) add(-2, "yoga-bad");
 
   if (pg.karanaName === "Vishti") add(-2, "karana-vishti");
+  else if (pg.karanaName === "Bava" || pg.karanaName === "Taitila") add(1, "karana-good");
 
   var tara = null, chandra = null;
   if (momNak !== null && momNak !== undefined && momNak !== "") {
@@ -283,8 +296,33 @@ function scoreDay(pg, weekday, momNak, momRashi, y, mo, d) {
   var root = numRoot(y, mo, d);
   add(numScore(root), "numero");
 
+  if (extra) {
+    if (extra.eclipse) add(-4, "eclipse");
+    if (extra.sankranti) add(-2, "sankranti");
+  }
+
   var verdict = score >= 8 ? "uttam" : score >= 5 ? "shubh" : score >= 2 ? "madhyam" : "avoid";
   return { score: score, pts: pts, verdict: verdict, tara: tara, chandra: chandra, numRoot: root };
+}
+
+// ---------- Abhijit Muhurta: 8th of 15 daytime parts, around solar noon ----------
+// Traditionally auspicious for all purposes; not observed on Wednesdays.
+function abhijitMuhurta(sunrise, sunset) {
+  var part = (sunset - sunrise) / 15;
+  var mid = (sunrise + sunset) / 2;
+  return { from: mid - part / 2, to: mid + part / 2 };
+}
+
+// ---------- Hora: planetary hour, Chaldean order, day starts with weekday lord ----------
+var HORA_SEQ = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"];
+var WD_LORD = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"]; // Sun..Sat
+var HORA_SA = { Sun: "Surya", Moon: "Chandra", Mars: "Mangala", Mercury: "Budha", Jupiter: "Guru", Venus: "Shukra", Saturn: "Shani" };
+var BENEFIC_HORA = { Jupiter: 1, Venus: 1, Mercury: 1, Moon: 1 };
+function horaAt(utc, sunrise, sunset, weekday) {
+  var dur = (sunset - sunrise) / 12;
+  var idx = Math.floor((utc - sunrise) / dur);
+  if (idx < 0 || idx > 11) return null;
+  return HORA_SEQ[(HORA_SEQ.indexOf(WD_LORD[weekday]) + idx) % 7];
 }
 
 // ---------- Suggested time windows within a day ----------
@@ -306,8 +344,11 @@ function findWindows(day) {
     var s = 0;
     if (STHIRA[rashi]) s += 2; else if (DWISHVA[rashi]) s += 1;
     if (day.tara && GOOD_TARA[day.tara]) s += 1;
+    var hl = horaAt(utc + 15 * 60000, day.sunrise, day.sunset, day.weekday);
+    var horaName = hl ? HORA_SA[hl] : null;
+    if (hl && BENEFIC_HORA[hl]) s += 1;
     if (s <= 0) continue;
-    slots.push({ from: utc, to: utc + 30 * 60000, score: s, lagna: rashi, lagnaName: RASHI_NAMES[rashi] });
+    slots.push({ from: utc, to: utc + 30 * 60000, score: s, lagna: rashi, lagnaName: RASHI_NAMES[rashi], hora: horaName });
   }
   // merge contiguous
   var merged = [];
@@ -337,11 +378,27 @@ function compute(opts) {
       .indexOf(utcToLocal(opts.tz, localToUTC(opts.tz, y, mo, d, 12, 0)).wd);
     var jdRise = st.sunrise / 86400000 + 2440587.5;
     var pg = panchanga(jdRise);
-    var sc = scoreDay(pg, weekday, opts.momNak, opts.momRashi, y, mo, d);
+    // Sankranti: Sun changes rashi between this sunrise and the next (traditionally avoided).
+    // The panchang day runs sunrise to sunrise, so a nighttime ingress flags this day.
+    var r1 = Math.floor(panchanga(jdRise).sun / 30);
+    var nxt = new Date(Date.UTC(y, mo - 1, d) + 86400000);
+    var stN = sunTimesUTC(nxt.getUTCFullYear(), nxt.getUTCMonth() + 1, nxt.getUTCDate(), opts.tz, opts.lat, opts.lon);
+    var r2 = Math.floor(panchanga(stN.sunrise / 86400000 + 2440587.5).sun / 30);
+    var dkey = y + "-" + (mo < 10 ? "0" : "") + mo + "-" + (d < 10 ? "0" : "") + d;
+    var sc = scoreDay(pg, weekday, opts.momNak, opts.momRashi, y, mo, d,
+      { sankranti: r1 !== r2, eclipse: !!ECLIPSE[dkey] });
+    var inausp = inauspiciousWindows(st.sunrise, st.sunset, weekday);
+    var abh = null;
+    if (weekday !== 3) {
+      var ab = abhijitMuhurta(st.sunrise, st.sunset);
+      // only show Abhijit if it does not clash with Rahu Kalam / Yamagandam
+      if (!(ab.from < inausp.rahu.to && ab.to > inausp.rahu.from) &&
+          !(ab.from < inausp.yama.to && ab.to > inausp.yama.from)) abh = ab;
+    }
     var day = {
       y: y, mo: mo, d: d, tz: opts.tz, lat: opts.lat, lon: opts.lon,
       weekday: weekday, sunrise: st.sunrise, sunset: st.sunset,
-      inausp: inauspiciousWindows(st.sunrise, st.sunset, weekday),
+      inausp: inausp, abhijit: abh, eclipse: !!ECLIPSE[dkey], sankranti: r1 !== r2,
       pg: pg, score: sc.score, pts: sc.pts, verdict: sc.verdict,
       tara: sc.tara, chandra: sc.chandra, numRoot: sc.numRoot
     };
@@ -357,6 +414,7 @@ window.MUHURTA = {
   compute: compute, panchanga: panchanga, jdUTC: jdUTC, sunPos: sunPos,
   moonPos: moonPos, ayanamsa: ayanamsa, lagna: lagna, sunTimesUTC: sunTimesUTC,
   localToUTC: localToUTC, utcToLocal: utcToLocal, fmtTime: fmtTime,
+  abhijitMuhurta: abhijitMuhurta, horaAt: horaAt,
   TITHI_NAMES: TITHI_NAMES, NAK_NAMES: NAK_NAMES, YOGA_NAMES: YOGA_NAMES, RASHI_NAMES: RASHI_NAMES,
   numRoot: numRoot, isGandanta: isGandanta
 };
