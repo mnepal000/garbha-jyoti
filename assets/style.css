@@ -39,9 +39,9 @@ h1, h2, h3, .serif {
 .brand img { width: 46px; height: 46px; border-radius: 50%; }
 .brand-name { font-family: "Tiro Devanagari Hindi", serif; font-size: 24px; color: var(--maroon); }
 .brand-name small { display: block; font-family: "Mukta", sans-serif; font-size: 12px; color: var(--muted); letter-spacing: 0.5px; }
-nav.main-nav { display: flex; gap: 4px; flex-wrap: wrap; }
+nav.main-nav { display: flex; gap: 2px; flex-wrap: wrap; align-items: center; }
 nav.main-nav a {
-  text-decoration: none; color: var(--ink); padding: 8px 14px; border-radius: 999px; font-size: 16px;
+  text-decoration: none; color: var(--ink); padding: 7px 11px; border-radius: 999px; font-size: 15px; white-space: nowrap;
 }
 nav.main-nav a:hover { background: var(--cream2); }
 nav.main-nav a.active { background: var(--maroon); color: #fff; }

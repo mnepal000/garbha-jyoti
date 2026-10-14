@@ -43,9 +43,9 @@
 </style>
 </head>
 <body>
-<script src="assets/i18n.min.js?v=11"></script>
-<script src="assets/site.min.js?v=11"></script>
-<script src="assets/muhurta.min.js?v=11"></script>
+<script src="assets/i18n.min.js?v=12"></script>
+<script src="assets/site.min.js?v=12"></script>
+<script src="assets/muhurta.min.js?v=12"></script>
 
 <section class="block" style="padding-top: 44px;">
   <div class="wrap">
@@ -176,6 +176,9 @@ function calcMuhurta() {
 function fact(label, val) {
   return '<div class="mu-fact"><b>' + label + "</b>" + val + "</div>";
 }
+function numTag(n) {
+  return n + " (" + (n === 4 || n === 8 ? T("mu_unfav") : [1, 3, 5, 6, 9].indexOf(n) >= 0 ? T("mu_fav") : T("mu_neu")) + ")";
+}
 
 // Date pickers: keep the "to" calendar on the same month as "from" (and vice versa),
 // so picking a December window does not force scrolling from the current month.
@@ -216,7 +219,8 @@ var MU_PTS_LABELS = {
   "tara-bad": { hi: "तारा बल अशुभ", en: "Tara bala unfavorable", ne: "तारा बल अशुभ" },
   "chandra-good": { hi: "चंद्र बल शुभ", en: "Chandra bala favorable", ne: "चन्द्र बल शुभ" },
   "chandra-bad": { hi: "चंद्र बल कमजोर", en: "Chandra bala weak", ne: "चन्द्र बल कमजोर" },
-  "numero": { hi: "अंकशास्त्र", en: "Numerology", ne: "अंकशास्त्र" },
+  "numero-mulank": { hi: "मूलांक", en: "Mulank", ne: "मूलाङ्क" },
+  "numero-bhagyank": { hi: "भाग्यांक", en: "Bhagyank", ne: "भाग्याङ्क" },
   "sankranti": { hi: "संक्रांति (बचें)", en: "Sankranti (avoid)", ne: "संक्रान्ति (बच्नुहोस्)" },
   "eclipse": { hi: "ग्रहण (बचें)", en: "Eclipse (avoid)", ne: "ग्रहण (बच्नुहोस्)" }
 };
@@ -238,7 +242,8 @@ function renderResults(days, tz) {
     h += fact(T("mu_nak"), pg.nakName + " (pada " + pg.pada + ")");
     h += fact(T("mu_yoga"), pg.yogaName);
     h += fact(T("mu_karana"), pg.karanaName);
-    h += fact(T("mu_num"), d.numRoot + " (" + (d.numRoot === 4 || d.numRoot === 8 ? T("mu_unfav") : [1, 3, 5, 6, 9].indexOf(d.numRoot) >= 0 ? T("mu_fav") : T("mu_neu")) + ")");
+    h += fact(T("mu_mulank"), numTag(d.mulank));
+    h += fact(T("mu_num"), numTag(d.numRoot));
     if (d.tara) h += fact(T("mu_tara"), M.TARA_NAMES[d.tara - 1] + " (" + ([2, 4, 6, 8, 9].indexOf(d.tara) >= 0 ? T("mu_fav") : T("mu_unfav")) + ")");
     if (d.chandra) h += fact(T("mu_chandra"), ([1, 3, 6, 7, 10, 11].indexOf(d.chandra) >= 0 ? T("mu_fav") : T("mu_unfav")));
     h += "</div>";

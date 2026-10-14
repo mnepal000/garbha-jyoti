@@ -240,12 +240,16 @@ var ECLIPSE = {
 var STHIRA = { 1: 1, 4: 1, 7: 1, 10: 1 }; // Vrishabha, Simha, Vrishchika, Kumbha
 var DWISHVA = { 2: 1, 5: 1, 8: 1, 11: 1 };
 
-// ---------- Numerology (Chaldean-flavored date root) ----------
-function numRoot(y, mo, d) {
-  var s = ("" + y + (mo < 10 ? "0" : "") + mo + (d < 10 ? "0" : "") + d).split("");
-  var n = s.reduce(function (a, c) { return a + (+c); }, 0);
+// ---------- Numerology (Chaldean-style) ----------
+// Mulank (birth number): root of the day of month. Bhagyank (destiny number):
+// root of the full date. Both are traditionally weighed when choosing a date.
+function digitalRoot(n) {
   while (n > 9) n = ("" + n).split("").reduce(function (a, c) { return a + (+c); }, 0);
   return n;
+}
+function numRoot(y, mo, d) {
+  var s = ("" + y + (mo < 10 ? "0" : "") + mo + (d < 10 ? "0" : "") + d).split("");
+  return digitalRoot(s.reduce(function (a, c) { return a + (+c); }, 0));
 }
 function numScore(root) {
   if ([1, 3, 5, 6, 9].indexOf(root) >= 0) return 1;
@@ -293,8 +297,10 @@ function scoreDay(pg, weekday, momNak, momRashi, y, mo, d, extra) {
     else add(-1, "chandra-bad");
   }
 
-  var root = numRoot(y, mo, d);
-  add(numScore(root), "numero");
+  var mulank = digitalRoot(d);
+  var bhagyank = numRoot(y, mo, d);
+  add(numScore(mulank), "numero-mulank");
+  add(numScore(bhagyank), "numero-bhagyank");
 
   if (extra) {
     if (extra.eclipse) add(-4, "eclipse");
@@ -302,7 +308,8 @@ function scoreDay(pg, weekday, momNak, momRashi, y, mo, d, extra) {
   }
 
   var verdict = score >= 8 ? "uttam" : score >= 5 ? "shubh" : score >= 2 ? "madhyam" : "avoid";
-  return { score: score, pts: pts, verdict: verdict, tara: tara, chandra: chandra, numRoot: root };
+  return { score: score, pts: pts, verdict: verdict, tara: tara, chandra: chandra,
+    numRoot: bhagyank, mulank: mulank };
 }
 
 // ---------- Abhijit Muhurta: 8th of 15 daytime parts, around solar noon ----------
@@ -400,7 +407,7 @@ function compute(opts) {
       weekday: weekday, sunrise: st.sunrise, sunset: st.sunset,
       inausp: inausp, abhijit: abh, eclipse: !!ECLIPSE[dkey], sankranti: r1 !== r2,
       pg: pg, score: sc.score, pts: sc.pts, verdict: sc.verdict,
-      tara: sc.tara, chandra: sc.chandra, numRoot: sc.numRoot
+      tara: sc.tara, chandra: sc.chandra, numRoot: sc.numRoot, mulank: sc.mulank
     };
     day.windows = findWindows(day);
     days.push(day);
